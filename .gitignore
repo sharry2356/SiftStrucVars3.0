@@ -4,4 +4,8 @@
 !.gitignore
 siftSVsMaster.sh
 !Rscripts/
+Rscripts/siftSVs1.R
+Rscripts/siftSVs2.R
+Rscripts/siftSVs3.R
+Rscripts/how to do relevent expression.R
 *test*
