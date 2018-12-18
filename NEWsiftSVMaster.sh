@@ -1,7 +1,7 @@
 #!/bin/bash
 
 #instead of doing intermediates at the end do it along the way and delete intermediates files along the way too (>> to an appended intermedial wc -l list) !!!
-#
+
  
 
 correlations=(0.95 0.975 0.99)
@@ -16,6 +16,22 @@ A510psc_over_NON_A510_psc="c(1.25)"
 fiveDPA_psc_over_A_psc_and_tenDPA_psc="c(0.5)"
 
 Rscript Rscripts/siftSVsag_togf.R
+
+for correlation in ${correlations[*]}
+do 
+  sed -i -E "s/[0-9]\\.[0-9]+/$correlation/" Rscripts/siftSVscorr.R 
+  Rscript Rscripts/siftSVscorr.R 
+  mkdir -p ${correlation}corr
+  mv -t ${correlation}corr GOIs_and_Correlatedgenes_list.txt Correlation_Table
+done
+
+for max_SVlength in ${max_SVlengths[*]}
+do
+  sed -i -E "s/max_SVlength\\=[0-9].*\\)/max_SVlength\\=$max_SVlength\\)/" Rscripts/siftSVsmaxSV.R
+  Rscript Rscripts/siftSVsmaxSV.R   
+  mkdir -p ${max_SVlength}maxSV
+  mv -t ${max_SVlength}maxSV bedformat_SVs.bed
+done 	
 
 for correlation in ${correlations[*]}
 do
