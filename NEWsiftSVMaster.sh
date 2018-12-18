@@ -17,14 +17,6 @@ fiveDPA_psc_over_A_psc_and_tenDPA_psc="c(0.5)"
 
 Rscript Rscripts/siftSVsag_togf.R
 
-for correlation in ${correlations[*]}
-do 
-  sed -i -E "s/[0-9]\\.[0-9]+/$correlation/" Rscripts/siftSVscorr.R 
-  Rscript Rscripts/siftSVscorr.R 
-  mkdir -p ${correlation}corr
-  mv -t ${correlation}corr GOIs_and_Correlatedgenes_list.txt Correlation_Table
-done
-
 for max_SVlength in ${max_SVlengths[*]}
 do
   sed -i -E "s/max_SVlength\\=[0-9].*\\)/max_SVlength\\=$max_SVlength\\)/" Rscripts/siftSVsmaxSV.R
@@ -35,6 +27,10 @@ done
 
 for correlation in ${correlations[*]}
 do
+  sed -i -E "s/[0-9]\\.[0-9]+/$correlation/" Rscripts/siftSVscorr.R 
+  Rscript Rscripts/siftSVscorr.R 
+  mkdir -p ${correlation}corr
+  mv -t ${correlation}corr GOIs_and_Correlatedgenes_list.txt Correlation_Table
   cd ${correlation}corr  
   grep -F -f GOIs_and_Correlatedgenes_list.txt ../annotatedgenome.gff > GOIs_and_Cs_annotatedgenome.bed
   # subset mRNA and CDS lines from GOIs_and_Cs_annotatedgenome.bed
