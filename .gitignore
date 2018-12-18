@@ -2,3 +2,6 @@
 !*.R
 !*.sh
 !.gitignore
+siftSVsMaster.sh
+!Rscripts/
+*test*
