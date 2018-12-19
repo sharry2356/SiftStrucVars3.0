@@ -4,6 +4,16 @@
 # create inputs for files on this bash script 
 # delete unnecesary files 
 
+#Inputs---FILE NAMES 
+#Except variable "SV_type" which refers to what the formating is of the SV_Table; so far "Visa" is the name for a vcf file and "Lemon" is the name for a file like the one Zach Lippman sent (the postdoc who did it was named Zach Lemmon) (READ THIS STATEMENT) 
+#Also "Expression_type" or colnumbs when incorporate Leighs Table (NOT DONE YET) 
+annotatedgenome="ITAG2.4_gene_models.gff3"
+SV_table="master_SVs_fromSofiaVisa_201807.vcf"
+SV_type="Visa" 
+Expression_data="markGeneList_RPKM_OvateCoexpr.csv" 
+goiList="shapeGoIList.txt"
+
+#Parameter values 
 correlations=(0.95 0.975 0.99)
 max_SVlengths=(5e6 1e6 500000 1e5)
 fivePrimeWindows=(10000 5000 1000)
@@ -15,6 +25,17 @@ A510psc_over_A510_NONpsc="c(1.25)"
 A510psc_over_NON_A510_psc="c(1.25)"
 fiveDPA_psc_over_A_psc_and_tenDPA_psc="c(0.5)"
 
+###############################################################################################################################################################################
+#Everything Below is code (Do not need to adjust anything) !!!!!!
+
+
+
+#Add file names to R scripts
+sed -i -E "s/\".*\",/\"$goiList\",expression_table_FILE=\"$Expression_data\",/" Rscripts/siftSVscorr.R 
+sed -i -E "s/\".*\",/\"$SV_type\",filename=\"$SV_table\",/" Rscripts/siftSVsmaxSV.R 
+sed -i -E "s/annotatedgenome_FILE=\".*\"/annotatedgenome_FILE=\"$annotatedgenome\"/" Rscripts/siftSVsag_togf.R
+
+#Start running pipeline 
 Rscript Rscripts/siftSVsag_togf.R
 
 for max_SVlength in ${max_SVlengths[*]}
