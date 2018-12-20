@@ -44,23 +44,24 @@ Visa_SVtobed <- function(filename,max_SVlength=50000){
 
 ####this isn't universal yet...make the fixing of the formatting (more unifrom) of marksgenes its own function
 ###(the first part before the first for loop)
-AllCorrelations_IMPROVED<- function(goiList_FILE,expression_table_FILE,corrthresh = 0.995){
-  expression_table <- read.csv(expression_table_FILE,
-                         colClasses = c("character", rep("numeric", 7), "character", "character",
-                                        rep("numeric", 2), "character", rep("numeric", 6)))
-  
+AllCorrelations_IMPROVED<- function(goiList_FILE,expression_table_FILE,expr_cols,corrthresh = 0.995){
+  expression_table <- read.csv(expression_table_FILE)
+  for (col in expr_cols) {
+    expression_table[,col]<-as.numeric(expression_table[,col])
+  }
+  expression_table[,1]<-as.character(expression_table[,1])
   goilogic <- readLines(goiList_FILE) == ""
   goiList <- readLines(goiList_FILE)
   goiList <- goiList[!goilogic]
   library(stringr)
   Cs<-c()
   for (GOI in goiList) {
-    GOIrow<-grep(GOI,expression_table$GENE.ID)
+    GOIrow<-grep(GOI,expression_table[,1])
     if (length(GOIrow)==1) {
       for(r in 1:nrow(expression_table)){
-        correlation<-cor(as.numeric(expression_table[GOIrow,2:7]),as.numeric(expression_table[r,2:7]))
+        correlation<-cor(as.numeric(expression_table[GOIrow,expr_cols]),as.numeric(expression_table[r,expr_cols]))
         if (correlation > corrthresh) {
-          Cs<-rbind(Cs,data.frame(GOI,correlation, correlated_gene = expression_table$GENE.ID[r]))
+          Cs<-rbind(Cs,data.frame(GOI,correlation, correlated_gene = expression_table[r,1]))
         } else{next}
       }
     } else{next}

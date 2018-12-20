@@ -3,14 +3,16 @@
 # make sure outupts are correct 
 # create inputs for files on this bash script 
 # delete unnecesary files 
+#negative correlations
 
 #Inputs---FILE NAMES 
 #Except variable "SV_type" which refers to what the formating is of the SV_Table; so far "Visa" is the name for a vcf file and "Lemon" is the name for a file like the one Zach Lippman sent (the postdoc who did it was named Zach Lemmon) (READ THIS STATEMENT) 
 #Also "Expression_type" or colnumbs when incorporate Leighs Table (NOT DONE YET) 
 annotatedgenome="ITAG2.4_gene_models.gff3"
-SV_table="master_SVs_fromSofiaVisa_201807.vcf"
-SV_type="Visa" 
+SV_table="cerasi_esther_typesave_1k_10min.vcf_noch00_anno5k.tab"
+SV_type="Lemon" 
 Expression_data="markGeneList_RPKM_OvateCoexpr.csv" 
+Expression_cols="c(2,4,5,3,7,6)"
 goiList="shapeGoIList.txt"
 
 #Parameter values 
@@ -31,7 +33,7 @@ fiveDPA_psc_over_A_psc_and_tenDPA_psc="c(0.5)"
 
 
 #Add file names to R scripts
-sed -i -E "s/\".*\",/\"$goiList\",expression_table_FILE=\"$Expression_data\",/" Rscripts/siftSVscorr.R 
+sed -i -E "s/\".*\",.*,/\"$goiList\",expression_table_FILE=\"$Expression_data\",$Expression_cols,/" Rscripts/siftSVscorr.R 
 sed -i -E "s/\".*\",/\"$SV_type\",filename=\"$SV_table\",/" Rscripts/siftSVsmaxSV.R 
 sed -i -E "s/annotatedgenome_FILE=\".*\"/annotatedgenome_FILE=\"$annotatedgenome\"/" Rscripts/siftSVsag_togf.R
 
