@@ -6,9 +6,8 @@
 #negative correlations
 
 #Inputs---FILE NAMES 
-#Except variable "SV_type" which refers to what the formating is of the SV_Table; so far "Visa" is the name for a vcf file and "Lemon" is the name for a file like the one Zach Lippman sent (the postdoc who did it was named Zach Lemmon) (READ THIS STATEMENT) 
-#Also "Expression_type" or colnumbs when incorporate Leighs Table (NOT DONE YET) 
-annotatedgenome="ITAG2.4_gene_models.gff3"
+#Except variables "SV_type" and "Expression_cols" which refer to what the formating of the SV_Table and which columns have expression data of Expression_data, respectively; so far for SV_type, "Visa" is the name for a vcf file and "Lemon" is the name for a file like the one Zach Lippman sent (the postdoc who did it was named Zach Lemmon); MAKE SURE Expression_cols IS A STRING OF A R VECTOR AS SEEN WITH THE "RELEVENTEXPRESSIONVARS A FEW LINES DOWN   
+annotatedgenome="ITAG3.2_gene_models.gff"
 SV_table="cerasi_esther_typesave_1k_10min.vcf_noch00_anno5k.tab"
 SV_type="Lemon" 
 Expression_data="markGeneList_RPKM_OvateCoexpr.csv" 
@@ -16,16 +15,17 @@ Expression_cols="c(2,4,5,3,7,6)"
 goiList="shapeGoIList.txt"
 
 #Parameter values 
-correlations=(0.95 0.975 0.99)
-max_SVlengths=(5e6 1e6 500000 1e5)
-fivePrimeWindows=(10000 5000 1000)
-#ReleventExpressionsVars--- MAKE SURE IN FORMAT OF R AND IN QUOTES--- order listed as arguments into Rscript ARE IMPORTANT (MAINTAIN SAME ORDER)  
-TM_SIM_FM="c(20,15,10)" 
-TM_SIM_FM_over_other_meristem_ratio="c(1.25)"
-Anthesis_fiveDPA_tenDPA_psc="c(15,10)"
-A510psc_over_A510_NONpsc="c(1.25)"
-A510psc_over_NON_A510_psc="c(1.25)"
-fiveDPA_psc_over_A_psc_and_tenDPA_psc="c(0.5)"
+# I believe 5' windows can only be in numeric notation (does not support scientific notation with "e") NEED TO CHECK THIS FIRST 
+correlations=(0.95 0.975 0.99 0.995)
+max_SVlengths=(1e5 1e6 5e6)
+fivePrimeWindows=(5000 20000 50000)
+#ReleventExpressionsVars--- MAKE SURE IN FORMAT OF R AND IN QUOTES--- order listed as arguments into Rscript ARE IMPORTANT (if adding more variables maintain order)  
+TM_SIM_FM="c(10,15,20)" 
+TM_SIM_FM_over_other_meristem_ratio="c(0.75,1,1.25)"
+Anthesis_fiveDPA_tenDPA_psc="c(10,15,20)"
+A510psc_over_A510_NONpsc="c(0.75,1,1.25)"
+A510psc_over_NON_A510_psc="c(0.75,1,1.25)"
+fiveDPA_psc_over_A_psc_and_tenDPA_psc="c(0.5,0.75,1)"
 
 ###############################################################################################################################################################################
 #Everything Below is code (Do not need to adjust anything) !!!!!!
