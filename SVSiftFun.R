@@ -41,6 +41,34 @@ Visa_SVtobed <- function(filename,max_SVlength=50000){
   detach(package:stringr)
 }
 
+#assumed orig csv is 1 based thats why i subtracted 1 from starts
+#also assumed position + svlen gives the position !!!!!!!!!!!!!!!!!!
+#NEW ONE DISCARD ABOVE 
+NewVisa_SVtobed  <- function(filename,max_SVlength=50000) {
+  library(stringr)
+  origtab<-read.csv("../Desktop/SiftStrucVars3.0/master_vcf_5_overlap_len_20_to_1m.csv")
+  chromNames<-str_extract(origtab$chrom,"ch\\d{2}")
+  svTypelogic<-grep("DEL",origtab$svtype)
+  starts<-c()
+  ends<-c()
+  for (r in 1:nrow(origtab)) {
+    if (origtab[r,]$svlen >= 0 ) {
+      starts<-append(starts,as.numeric(origtab[r,]$pos))
+      ends<-append(ends,as.numeric(origtab[r,]$pos)+as.numeric(origtab[r,]$svlen))
+    }
+    else {
+      starts<-append(starts,as.numeric(origtab[r,]$pos)+as.numeric(origtab[r,]$svlen)) 
+      ends<-append(ends,as.numeric(origtab[r,]$pos)) 
+    }
+  }
+  starts<-starts - 1
+  bedformat<-data.frame(chromNames,starts,ends,origtab$names,stringsAsFactors = F)
+  bedformat<-bedformat[svTypelogic,]
+  bedformat<-bedformat[bedformat$ends - bedformat$starts < max_SVlength,]
+  write.table(bedformat, "bedformat_SVs.bed", col.names = F, quote=F, row.names=F, sep="\t")
+  detach(package:stringr)
+}
+
 
 ####this isn't universal yet...make the fixing of the formatting (more unifrom) of marksgenes its own function
 ###(the first part before the first for loop)
@@ -112,7 +140,9 @@ SVs_to_Bedformat<- function(senderofSV, filename, max_SVlength=50000){
     return(Lemon_SVtobed(filename,max_SVlength))
   } else if (senderofSV=="Visa") {
     return(Visa_SVtobed(filename,max_SVlength))
-  } else {print("Names so far are either 'Visa' or 'Lemon' ")}
+  } else if (senderofSV=="NewVisa") {
+    return(NewVisa_SVtobed(filename,max_SVlength))
+  } else {print("Names so far are either 'Visa', 'NewVisa', or 'Lemon' ")}
 }
 
 #change annotated genome to 0 based (NOT NEEEDED, bedtoos recognizes gff as 1 based)
