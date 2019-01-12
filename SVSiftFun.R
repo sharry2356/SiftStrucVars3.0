@@ -460,7 +460,7 @@ AddReleventExpressiontoSVs<- function(Relevent_ExpressionFILE, SVs_intersect_CDS
   SVs_intersect<-data.frame(SVs_intersect,(sapply(RelExpr_names, function(x) vector(,length = nrow(SVs_intersect)))))
   for (r in 1:nrow(SVs_intersect)) {
     Relrow<-grep(as.character(SVs_intersect$affected_gene[r]), Relevent_Expression$gene)
-    SVs_intersect[r,RelExpr_names]<-unlist(Relevent_Expression[Relrow,as.character(RelExpr_names)])
+    SVs_intersect[r,RelExpr_names]<-as.character(unlist(Relevent_Expression[Relrow,as.character(RelExpr_names)]))
   }
   return(SVs_intersect)
 }
