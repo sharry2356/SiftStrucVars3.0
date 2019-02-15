@@ -42,19 +42,19 @@ Visa_SVtobed <- function(filename,max_SVlength=50000){
 }
 
 #assumed orig csv is 1 based thats why i subtracted 1 from starts
-#also assumed position + svlen gives the position !!!!!!!!!!!!!!!!!!
+#also assumed position + svlen gives the position !!!!!!!!!!!!!!!!!! check numpy manual 
 #NEW ONE DISCARD ABOVE 
 NewVisa_SVtobed  <- function(filename,max_SVlength=50000) {
   library(stringr)
-  origtab<-read.csv("../Desktop/SiftStrucVars3.0/master_vcf_5_overlap_len_20_to_1m.csv")
+  origtab<-read.csv(filename)
   chromNames<-str_extract(origtab$chrom,"ch\\d{2}")
   svTypelogic<-grep("DEL",origtab$svtype)
   starts<-c()
   ends<-c()
   for (r in 1:nrow(origtab)) {
-    if (origtab[r,]$svlen >= 0 ) {
+    if (origtab[r,]$svlen >= 0 || origtab[r,]$svlen < 0 ) {
       starts<-append(starts,as.numeric(origtab[r,]$pos))
-      ends<-append(ends,as.numeric(origtab[r,]$pos)+as.numeric(origtab[r,]$svlen))
+      ends<-append(ends,as.numeric(origtab[r,]$pos)+abs(as.numeric(origtab[r,]$svlen)))
     }
     else {
       starts<-append(starts,as.numeric(origtab[r,]$pos)+as.numeric(origtab[r,]$svlen)) 
@@ -460,7 +460,7 @@ AddReleventExpressiontoSVs<- function(Relevent_ExpressionFILE, SVs_intersect_CDS
   SVs_intersect<-data.frame(SVs_intersect,(sapply(RelExpr_names, function(x) vector(,length = nrow(SVs_intersect)))))
   for (r in 1:nrow(SVs_intersect)) {
     Relrow<-grep(as.character(SVs_intersect$affected_gene[r]), Relevent_Expression$gene)
-    SVs_intersect[r,RelExpr_names]<-unlist(Relevent_Expression[Relrow,as.character(RelExpr_names)])
+    SVs_intersect[r,RelExpr_names]<-as.character(unlist(Relevent_Expression[Relrow,as.character(RelExpr_names)]))
   }
   return(SVs_intersect)
 }
