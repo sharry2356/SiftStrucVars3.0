@@ -1,3 +1,4 @@
+#testchange
 genes<-c("Solyc07g008670","Solyc09g005750","Solyc06g083660","Solyc09g063080","Solyc07g032710","Solyc03g006840")
 corrinter<-corr975tab[grep(paste(genes,collapse = "|"),corr975tab$GOI),c(1,3)]
 SVinter<-SV_intersect3[grep(paste(corrinter[,2],collapse = "|"),SV_intersect3[,1]),]
