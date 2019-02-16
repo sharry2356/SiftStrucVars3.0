@@ -20,12 +20,12 @@ correlations=(0.95 0.975 0.99 0.995)
 max_SVlengths=(1e5 1e6 5e6)
 fivePrimeWindows=(5000 20000 50000)
 #ReleventExpressionsVars--- MAKE SURE IN FORMAT OF R AND IN QUOTES--- order listed as arguments into Rscript ARE IMPORTANT (if adding more variables maintain order)  
-TM_SIM_FM="c(10,15,20)" 
-TM_SIM_FM_over_other_meristem_ratio="c(0.75,1,1.25)"
-Anthesis_fiveDPA_tenDPA_psc="c(10,15,20)"
-A510psc_over_A510_NONpsc="c(0.75,1,1.25)"
-A510psc_over_NON_A510_psc="c(0.75,1,1.25)"
-fiveDPA_psc_over_A_psc_and_tenDPA_psc="c(0.5,0.75,1)"
+TM_SIM_FM="c(10)" 
+TM_SIM_FM_over_other_meristem_ratio="c(0.1)"
+Anthesis_fiveDPA_tenDPA_psc="c(10)"
+A510psc_over_A510_NONpsc="c(0.75)"
+A510psc_over_NON_A510_psc="c(0.75)"
+fiveDPA_psc_over_A_psc_and_tenDPA_psc="c(0.5)"
 
 ###############################################################################################################################################################################
 #Everything Below is code (Do not need to adjust anything) !!!!!!
@@ -36,6 +36,7 @@ fiveDPA_psc_over_A_psc_and_tenDPA_psc="c(0.5,0.75,1)"
 if [[ "$skipCorr" == "False" ]] || [[ "$skipCorr" == "F" ]] 
 then
   echo "YOU ARE SKIPPING CORRELATION!!!!"
+  echo "You will get 2 errors regarding 'Correlation Table'; This is normal, disregard them; Errors after these  are also normal if for some parameters no SV overlap was found"
   correlations=(1.0)
 else
   sed -i -E "s/\".*\",.*,/\"$goiList\",expression_table_FILE=\"$Expression_data\",$Expression_cols,/" Rscripts/siftSVscorr.R 
