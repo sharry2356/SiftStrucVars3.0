@@ -6,14 +6,14 @@
 #negative correlations
 
 #Inputs---FILE NAMES 
-#Except variables "SV_type" and "Expression_cols" which refer to what the formating of the SV_Table and which columns have expression data of Expression_data, respectively; so far for SV_type, "Visa" is the name for a vcf file and "Lemon" is the name for a file like the one Zach Lippman sent (the postdoc who did it was named Zach Lemmon); MAKE SURE Expression_cols IS A STRING OF A R VECTOR AS SEEN WITH THE "RELEVENTEXPRESSIONVARS A FEW LINES DOWN   
+#Except variables "SV_type" and "Expression_cols" which refer to what the formating of the SV_Table and which columns have expression data of Expression_data, respectively; so far for SV_type, "Visa" is the name for a vcf file and "Lemon" is the name for a file like the one Zach Lippman sent (the postdoc who did it was named Zach Lemmon); MAKE SURE Expression_cols IS A STRING OF A R VECTOR AS SEEN WITH THE "RELEVENTEXPRESSIONVARS A FEW LINES DOWN; skipCorr="False" or "F" when not trying to do correlation     
 annotatedgenome="ITAG3.2_gene_models.gff"
 SV_table="cerasi_esther_typesave_1k_10min.vcf_noch00_anno5k.tab"
 SV_type="Lemon" 
 Expression_data="markGeneList_RPKM_OvateCoexpr.csv" 
 Expression_cols="c(2,4,5,3,7,6)"
 goiList="shapeGoIList.txt"
-
+skipCorr="False"
 #Parameter values 
 # I believe 5' windows can only be in numeric notation (does not support scientific notation with "e") NEED TO CHECK THIS FIRST 
 correlations=(0.95 0.975 0.99 0.995)
@@ -33,7 +33,13 @@ fiveDPA_psc_over_A_psc_and_tenDPA_psc="c(0.5,0.75,1)"
 
 
 #Add file names to R scripts
-sed -i -E "s/\".*\",.*,/\"$goiList\",expression_table_FILE=\"$Expression_data\",$Expression_cols,/" Rscripts/siftSVscorr.R 
+if [[ "$skipCorr" == "False" ]] || [[ "$skipCorr" == "F" ]] 
+then
+  echo "YOU ARE SKIPPING CORRELATION!!!!"
+  correlations=(1.0)
+else
+  sed -i -E "s/\".*\",.*,/\"$goiList\",expression_table_FILE=\"$Expression_data\",$Expression_cols,/" Rscripts/siftSVscorr.R 
+fi
 sed -i -E "s/\".*\",/\"$SV_type\",filename=\"$SV_table\",/" Rscripts/siftSVsmaxSV.R 
 sed -i -E "s/annotatedgenome_FILE=\".*\"/annotatedgenome_FILE=\"$annotatedgenome\"/" Rscripts/siftSVsag_togf.R
 
@@ -50,8 +56,13 @@ done
 
 for correlation in ${correlations[*]}
 do
-  sed -i -E "s/[0-9]\\.[0-9]+/$correlation/" Rscripts/siftSVscorr.R 
-  Rscript Rscripts/siftSVscorr.R 
+  if [[ "$skipCorr" == "False" ]] || [[ "$skipCorr" == "F" ]] 
+  then
+    cp $goiList GOIs_and_Correlatedgenes_list.txt     
+  else  
+    sed -i -E "s/[0-9]\\.[0-9]+/$correlation/" Rscripts/siftSVscorr.R 
+    Rscript Rscripts/siftSVscorr.R
+  fi  
   mkdir -p ${correlation}corr
   mv -t ${correlation}corr GOIs_and_Correlatedgenes_list.txt Correlation_Table
   cd ${correlation}corr  
