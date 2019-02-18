@@ -7,20 +7,20 @@
 
 #Inputs---FILE NAMES 
 #Except variables "SV_type" and "Expression_cols" which refer to what the formating of the SV_Table and which columns have expression data of Expression_data, respectively; so far for SV_type, "Visa" is the name for a vcf file and "Lemon" is the name for a file like the one Zach Lippman sent (the postdoc who did it was named Zach Lemmon); MAKE SURE Expression_cols IS A STRING OF A R VECTOR AS SEEN WITH THE "RELEVENTEXPRESSIONVARS A FEW LINES DOWN; skipCorr="False" or "F" when not trying to do correlation     
-annotatedgenome="ITAG3.2_gene_models.gff"
-SV_table="cerasi_esther_typesave_1k_10min.vcf_noch00_anno5k.tab"
-SV_type="Lemon" 
+annotatedgenome="ITAG2.4_gene_models.gff3"
+SV_table="master_vcf_5_overlap_len_20_to_1m.csv"
+SV_type="NewVisa" 
 Expression_data="markGeneList_RPKM_OvateCoexpr.csv" 
 Expression_cols="c(2,4,5,3,7,6)"
-goiList="shapeGoIList.txt"
-skipCorr="False"
+goiList="TRMs_wM8.txt"
+skipCorr="T"
 #Parameter values 
 # I believe 5' windows can only be in numeric notation (does not support scientific notation with "e") NEED TO CHECK THIS FIRST 
-correlations=(0.95 0.975 0.99 0.995)
-max_SVlengths=(1e5 1e6 5e6)
-fivePrimeWindows=(5000 20000 50000)
+correlations=(0.99)
+max_SVlengths=(1e6)
+fivePrimeWindows=(5000)
 #ReleventExpressionsVars--- MAKE SURE IN FORMAT OF R AND IN QUOTES--- order listed as arguments into Rscript ARE IMPORTANT (if adding more variables maintain order)  
-TM_SIM_FM="c(10)" 
+TM_SIM_FM="c(5)" 
 TM_SIM_FM_over_other_meristem_ratio="c(0.1)"
 Anthesis_fiveDPA_tenDPA_psc="c(10)"
 A510psc_over_A510_NONpsc="c(0.75)"

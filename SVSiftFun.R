@@ -48,7 +48,7 @@ NewVisa_SVtobed  <- function(filename,max_SVlength=50000) {
   library(stringr)
   origtab<-read.csv(filename)
   chromNames<-str_extract(origtab$chrom,"ch\\d{2}")
-  svTypelogic<-grep("DEL",origtab$svtype)
+  svTypelogic<-grep("DEL|DUP|INV",origtab$svtype)
   starts<-c()
   ends<-c()
   for (r in 1:nrow(origtab)) {
@@ -62,7 +62,7 @@ NewVisa_SVtobed  <- function(filename,max_SVlength=50000) {
     }
   }
   starts<-starts - 1
-  bedformat<-data.frame(chromNames,starts,ends,origtab$names,stringsAsFactors = F)
+  bedformat<-data.frame(chromNames,starts,ends,origtab$svtype,origtab$names,stringsAsFactors = F)
   bedformat<-bedformat[svTypelogic,]
   bedformat<-bedformat[bedformat$ends - bedformat$starts < max_SVlength,]
   write.table(bedformat, "bedformat_SVs.bed", col.names = F, quote=F, row.names=F, sep="\t")
@@ -180,15 +180,15 @@ Strip_to_Integers<- function(Full_CDS_sets_FILE, overlapping_SVs_and_GOIsandCs_C
       start_to_end<- genesubset_CDS[z,4]:genesubset_CDS[z,5]
       genesubset_CDS_integers_combined <- append(start_to_end, genesubset_CDS_integers_combined)
     }
-    namelogic_SVs<- grepl(genes_with_CDS_overlapped_by_SVs[r], overlapping_SVs_and_GOIsandCs_CDS[,14])
-    genesubset_SVs<- unique(overlapping_SVs_and_GOIsandCs_CDS[namelogic_SVs,3:5])
+    namelogic_SVs<- grepl(genes_with_CDS_overlapped_by_SVs[r], overlapping_SVs_and_GOIsandCs_CDS[,15])
+    genesubset_SVs<- unique(overlapping_SVs_and_GOIsandCs_CDS[namelogic_SVs,3:6])
     genesubset_SVs<-cbind(genesubset_SVs[,1:2],"integers_inCDS_notin_SVs" = vector(, nrow(genesubset_SVs)),
                           "affected_gene"= rep(genes_with_CDS_overlapped_by_SVs[r], nrow(genesubset_SVs)), 
                           "combinedCDSlength" = rep(length(genesubset_CDS_integers_combined),nrow(genesubset_SVs)),
                           "strand" = rep(genesubset_CDS[1,7],nrow(genesubset_SVs)), 
                           "Low CDSbp" = rep(min(genesubset_CDS_integers_combined),nrow(genesubset_SVs)),
                           "High CDSbp" = rep(max(genesubset_CDS_integers_combined),nrow(genesubset_SVs)),
-                          "accessions" = genesubset_SVs[,3])
+                          "accessions" = genesubset_SVs[,4],"svtype" = genesubset_SVs[,3])
     for(y in 1:nrow(genesubset_SVs)){
       start_to_end<- genesubset_SVs[y,1]:genesubset_SVs[y,2]
       intersect_CDS<-intersect(start_to_end,genesubset_CDS_integers_combined)
@@ -269,11 +269,14 @@ MutationMath<- function(Stripped_for_Analysis){
         }
       }
     }
-    del_analyzed<- cbind(Stripped_for_Analysis[r,c(1,2,4,9)],whole_gene_deleted,  percentofgene_deleted,in_frame, framshift, start_deleted, end_deleted, likely_knockout)
+    del_analyzed<- cbind(Stripped_for_Analysis[r,c(1,2,10,4,9)],whole_gene_deleted,  percentofgene_deleted,in_frame, framshift, start_deleted, end_deleted, likely_knockout)
     SVs_intersect_CDS<-rbind(del_analyzed,SVs_intersect_CDS)
   }
+  names(SVs_intersect_CDS)<-gsub("deleted","affected",colnames(SVs_intersect_CDS))
+  SVs_intersect_CDS$likely_knockout<-as.character(SVs_intersect_CDS$likely_knockout)
+  SVs_intersect_CDS$likely_knockout[!grepl("DEL",as.character(SVs_intersect_CDS$svtype))]<-"program cannot determine yet"
   write.table(SVs_intersect_CDS, "SVs_intersect_CDS.txt", sep = "\t")
-  writeLines(as.character(unique(SVs_intersect_CDS[,3])), "SVs_intersect_CDS_genelist.txt",sep = "\n")
+  writeLines(as.character(unique(SVs_intersect_CDS[,4])), "SVs_intersect_CDS_genelist.txt",sep = "\n")
 }
 
 # combine SVs that intersect 5' and promoter region (both have corresponding genes affected too)
@@ -286,19 +289,19 @@ SVs_intersect_RE_FUNC<- function(SVs_2000_from_promoter_and_genes_FILE, SVs_only
                                                                                        nrow(SVs_only_intersect_fives)))
   inter<-rbind(SVs_2000_from_promoter_and_genes,SVs_only_intersect_fives)
   library(stringr)
-  SVs_intersect_RE<-data.frame(inter[,2:3], "affected_gene" = str_extract(inter[,13], "Solyc\\d*g\\d*"), 
-                               "accessions" = inter[,4], "intersect_5_prime" = inter[,14])
+  SVs_intersect_RE<-data.frame(inter[,2:3], "svtype" = inter[,4],"affected_gene" = str_extract(inter[,14], "Solyc\\d*g\\d*"), 
+                               "accessions" = inter[,5], "intersect_5_prime" = inter[,15])
   SVs_intersect_RE$V2<- SVs_intersect_RE$V2 + 1
   write.table(unique(SVs_intersect_RE),"SVs_intersect_RE.txt", sep = "\t")
-  writeLines(as.character(unique(SVs_intersect_RE[,3])), "SVs_intersect_RE_genelist.txt",sep = "\n")
+  writeLines(as.character(unique(SVs_intersect_RE[,4])), "SVs_intersect_RE_genelist.txt",sep = "\n")
 }
 ###need to add 1 to SVs to make 1 based again
 ###Generate list of genes to look up and view expression of and place downloads into appropriate directories  
 Generate_genelistsFUNC<- function(SVs_intersect_CDS_FILE, SVs_intersect_RE_FILE) {  
   SVs_intersect_CDS<-read.delim(SVs_intersect_CDS_FILE)
   SVs_intersect_RE<-read.delim(SVs_intersect_RE_FILE)
-  writeLines(as.character(unique(SVs_intersect_CDS[,3])), "SVs_intersect_CDS_genelist.txt",sep = "\n")
-  writeLines(as.character(unique(SVs_intersect_RE[,3])), "SVs_intersect_RE_genelist.txt",sep = "\n")
+  writeLines(as.character(unique(SVs_intersect_CDS[,4])), "SVs_intersect_CDS_genelist.txt",sep = "\n")
+  writeLines(as.character(unique(SVs_intersect_RE[,4])), "SVs_intersect_RE_genelist.txt",sep = "\n")
 }
 
 ###Read expression files downloaded from solgenomics (make sure each type in seperate folder)
