@@ -99,7 +99,8 @@ do
     cd ${max_SVlength}maxSV
     for windowSize in ${fivePrimeWindows[*]}
     do
-      bedtools window -a SVs_no_interesct_CDS_or_5_prime.bed -b ../GOIs_and_Cs_five_prime_UTR.bed -sw -r 0 -l $windowSize > SVs_upstream_of_genes.bed
+      #changed A and B in bedtools call below (adjust pipeline accordingly)  
+      bedtools window -a ../GOIs_and_Cs_five_prime_UTR.bed -b SVs_no_interesct_CDS_or_5_prime.bed -sw -r 0 -l $windowSize > SVs_upstream_of_genes.bed
       Rscript ../../Rscripts/siftSVsintregulatory.R 
       head -n 1 ../../Anthesis.txt > Anthesis_RE.txt 
       head -n 1 ../../Meristems.txt > Meristems_RE.txt 

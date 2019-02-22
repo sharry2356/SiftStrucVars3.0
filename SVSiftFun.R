@@ -280,14 +280,24 @@ MutationMath<- function(Stripped_for_Analysis){
 }
 
 # combine SVs that intersect 5' and promoter region (both have corresponding genes affected too)
+# if it is + strand then CDS located downstream(higher numbers); if - strand then CDS located upstream (lower numbers)
+#if + see how far the end of SV is from start of UTR; if - see how far end of UTR is from start of SV 
 SVs_intersect_RE_FUNC<- function(SVs_2000_from_promoter_and_genes_FILE, SVs_only_intersect_fives_FILE) {
   SVs_2000_from_promoter_and_genes<-read.delim(SVs_2000_from_promoter_and_genes_FILE, header = F)
   SVs_only_intersect_fives<-read.delim(SVs_only_intersect_fives_FILE, header = F)
-  SVs_2000_from_promoter_and_genes<- cbind(SVs_2000_from_promoter_and_genes, "intersect_5_prime" = rep("NO (within 
-                                            specified bp upstream of 5 prime)", nrow(SVs_2000_from_promoter_and_genes)))
+  UTRdist<-c()
+  for (r in 1:nrow(SVs_2000_from_promoter_and_genes)) {
+    if (SVs_2000_from_promoter_and_genes[r,7]=="+") {
+      UTRdist<-append(UTRdist,SVs_2000_from_promoter_and_genes[r,4]-SVs_2000_from_promoter_and_genes[r,12]) 
+    } else {
+      UTRdist<-append(UTRdist,SVs_2000_from_promoter_and_genes[r,11]-SVs_2000_from_promoter_and_genes[r,5])
+    }
+  }
+  SVs_2000_from_promoter_and_genes<- cbind(SVs_2000_from_promoter_and_genes[,10:14],SVs_2000_from_promoter_and_genes[,1:9], 
+                                           "intersect_5_prime" = paste("NO(SV is",UTRdist,"bp away with gene on",SVs_2000_from_promoter_and_genes[,7],"strand)"))
   SVs_only_intersect_fives<- cbind(SVs_only_intersect_fives, "intersect_5_prime" = rep("Yes", 
                                                                                        nrow(SVs_only_intersect_fives)))
-  inter<-rbind(SVs_2000_from_promoter_and_genes,SVs_only_intersect_fives)
+  inter<-rbind(setNames(SVs_2000_from_promoter_and_genes,names(SVs_only_intersect_fives)),SVs_only_intersect_fives)
   library(stringr)
   SVs_intersect_RE<-data.frame(inter[,2:3], "svtype" = inter[,4],"affected_gene" = str_extract(inter[,14], "Solyc\\d*g\\d*"), 
                                "accessions" = inter[,5], "intersect_5_prime" = inter[,15])
