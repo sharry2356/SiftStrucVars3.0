@@ -282,6 +282,12 @@ MutationMath<- function(Stripped_for_Analysis){
 # combine SVs that intersect 5' and promoter region (both have corresponding genes affected too)
 # if it is + strand then CDS located downstream(higher numbers); if - strand then CDS located upstream (lower numbers)
 #if + see how far the end of SV is from start of UTR; if - see how far end of UTR is from start of SV 
+# only use unique (Get rid of multiple UTR isue)--fix: take only the smallest one 
+    #note: if its a duplicate it is right next to each other (only need to check previous row)
+    # or see if there are multiple and then subset 
+#remove duplicates 
+    # duplicate function to generate new table of duplicates: subset for lower number
+    # rbind this and all the ones that generated false 
 SVs_intersect_RE_FUNC<- function(SVs_2000_from_promoter_and_genes_FILE, SVs_only_intersect_fives_FILE) {
   SVs_2000_from_promoter_and_genes<-read.delim(SVs_2000_from_promoter_and_genes_FILE, header = F)
   SVs_only_intersect_fives<-read.delim(SVs_only_intersect_fives_FILE, header = F)
@@ -302,6 +308,17 @@ SVs_intersect_RE_FUNC<- function(SVs_2000_from_promoter_and_genes_FILE, SVs_only
   SVs_intersect_RE<-data.frame(inter[,2:3], "svtype" = inter[,4],"affected_gene" = str_extract(inter[,14], "Solyc\\d*g\\d*"), 
                                "accessions" = inter[,5], "intersect_5_prime" = inter[,15])
   SVs_intersect_RE$V2<- SVs_intersect_RE$V2 + 1
+  fullinfo<-paste(SVs_intersect_RE$V2,SVs_intersect_RE$V3,SVs_intersect_RE$svtype,SVs_intersect_RE$affected_gene)
+  dups<-unique(fullinfo[duplicated(fullinfo)])
+  if (length(dups) > 0) {
+    remdupind<-c()
+    for (d in dups) {
+      indices<-grep(d,fullinfo)
+      dists<-UTRdist[indices]
+      remdupind<-append(remdupind,indices[-which.min(dists)])
+    }
+    SVs_intersect_RE<-SVs_intersect_RE[-remdupind,]
+  }
   write.table(unique(SVs_intersect_RE),"SVs_intersect_RE.txt", sep = "\t")
   writeLines(as.character(unique(SVs_intersect_RE[,4])), "SVs_intersect_RE_genelist.txt",sep = "\n")
 }
