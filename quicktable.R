@@ -23,30 +23,46 @@ for (r in 1:nrow(SVinter)) {
 #see if you can just give it a folder or something and it will solve it (don't need to specify every file)
 
 condensedtab <- function(genesv,corrtable,SVs_intersect_CDS_file,SVs_intersect_RE_file,Anthesis) {
-  corrtable<-read.delim(corrtable)
+  corrtable_file<-"Correlation_Table"
+  SVs_intersect_CDS_file<-"1e6maxSV/SVs_intersect_CDS.txt"
+  SVs_intersect_RE_file<-"1e6maxSV/5000fiveprimewindow/SVs_intersect_RE.txt"
+  humtab_file<-"../../../Documents/humtab"
+  Rel_Expr_file<-"../Anthesis.txt"
+  humtab<-read.delim(humtab_file)
+  genesv<-as.character(humtab$genesv)
+  corrtable<-read.delim(corrtable_file)
   corrtable<-corrtable[grep(paste(genesv,collapse = "|"),corrtable$GOI),c("GOI","correlated_gene")]
   SV_intersect_CDS<-read.delim(SVs_intersect_CDS_file)
-  SV_intersect_CDS<-SV_intersect_CDS[grep("OVATE",SV_intersect_CDS[,12]),c(1:4,12)]
+  SV_intersect_CDS<-SV_intersect_CDS[grep("OVATE",SV_intersect_CDS[,13]),c(1:5,13)]
   SV_intersect_CDS<-cbind(SV_intersect_CDS, intersect_CDS = rep("yes",nrow(SV_intersect_CDS)))
   if (SVs_intersect_RE == 0) {
     SV_inter<-SV_intersect_CDS
-  }
-  else {
+  } else {
     SV_intersect_RE<-read.delim(SVs_intersect_RE_file)
-    SV_intersect_RE<-SV_intersect_RE[grep("OVATE",SV_intersect_RE[,6]),c(1:4,6)]
-    SV_intersect_RE<-cbind(SV_intersect_RE, intersect_CDS = rep("no",nrow(SV_intersect_RE)))
+    SV_intersect_RE<-SV_intersect_RE[grep("OVATE",SV_intersect_RE[,7]),]
+    intersect_CDS<-gsub("Yes","No in 5'UTR",SV_intersect_RE$intersect_5_prime)
+    SV_intersect_RE<-cbind(SV_intersect_RE[,c(1:5,7)], intersect_CDS)
     SV_inter<-rbind(SV_intersect_CDS,SV_intersect_RE)
   } 
   grep1<-grep(paste(corrtable$correlated_gene[1:2538],collapse = "|"),SV_inter$affected_gene)
-  grep2<- c(grep1,grep(paste(corrtable$correlated_gene[2539:3972],collapse = "|"),SV_inter$affected_gene)) 
-  SV_inter<-SV_inter[unique(grep2),]
+  grep2<- grep(paste(corrtable$correlated_gene[2539:4500],collapse = "|"),SV_inter$affected_gene) 
+  grep3<- grep(paste(corrtable$correlated_gene[4501:6500],collapse = "|"),SV_inter$affected_gene) 
+  grep4<- grep(paste(corrtable$correlated_gene[6501:8500],collapse = "|"),SV_inter$affected_gene) 
+  SV_inter<-SV_inter[unique(c(grep1,grep2,grep3,grep4)),]
   Anthesis<-read.delim(Rel_Expr_file)
   final<-c()
   for (r in 1:nrow(SV_inter)) {
-    gois <- paste(corrtable[grep(SV_inter[r,3],corrtable$correlated_gene),1], collapse = ",")
-    protein<- as.character(Anthesis[grep(SV_inter[r,3],Anthesis$gene.name),c("description")])
-    final <- rbind(cbind(gois,SV_inter[r,],protein),final)
+    #gois <- paste(corrtable[grep(SV_inter[r,4],corrtable$correlated_gene),1], collapse = ",")
+    gois <- corrtable[grep(SV_inter[r,4],corrtable$correlated_gene),1]
+    goiHumNames<-c()
+    for (goi in gois) {
+      goiHumName<-paste(goi,"(",humtab[grep(goi,humtab$genesv),2],")",sep = "")
+      goiHumNames<-append(goiHumNames,goiHumName)
+    }
+    protein<- as.character(Anthesis[grep(SV_inter[r,4],Anthesis$gene.name),c("description")])
+    final <- rbind(cbind(gois = paste(goiHumNames,collapse = ","),SV_inter[r,],protein),final)
   }
+  final<-cbind(final[,1:7],"sv_size_(bp)" = final$V3-final$V2,final[,8:9])
   return(final)
 }
 
