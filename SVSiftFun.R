@@ -78,6 +78,8 @@ AllCorrelations_IMPROVED<- function(goiList_FILE,expression_table_FILE,expr_cols
     expression_table[,col]<-as.numeric(expression_table[,col])
   }
   expression_table[,1]<-as.character(expression_table[,1])
+  sums<-sapply(1:nrow(expression_table), function(r) sum(as.numeric(expression_table[r,expr_cols])))
+  expression_table<-expression_table[(sums > 0),]
   goilogic <- readLines(goiList_FILE) == ""
   goiList <- readLines(goiList_FILE)
   goiList <- goiList[!goilogic]
